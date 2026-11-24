@@ -27,11 +27,17 @@
 // Gate: 1 character, 4 bytes UTF-8, no trailing newline — inside the
 // 1–8 character gate, not whitespace-only.
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const EMOJI = "🌞"; // U+1F31E SUN WITH FACE
 
 const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 mkdirSync(outDir, { recursive: true });
-writeFileSync(join(outDir, "entry.txt"), EMOJI, "utf8");
+const entryPath = join(outDir, "entry.txt");
+writeFileSync(entryPath, EMOJI, "utf8");
+// Self-check: read back what was written and fail loudly on any
+// mismatch, so a silent or partial write can never ship as the entry.
+if (readFileSync(entryPath, "utf8") !== EMOJI) {
+  throw new Error("entry.txt does not match the chosen emoji");
+}
